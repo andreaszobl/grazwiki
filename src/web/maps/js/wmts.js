@@ -178,7 +178,7 @@ var vectorlayer = new ol.layer.Vector({
 
 
 var clusterSource = new ol.source.Cluster({
-	  distance: 50,
+	  distance: 20,
 	  source: geosource,
 });
 
@@ -212,6 +212,39 @@ var clusters = new ol.layer.Vector({
   }
 });
 
+
+/**
+ * Elements that make up the popup.
+ */
+var container = document.getElementById('popup');
+var content = document.getElementById('popup-content');
+var closer = document.getElementById('popup-closer');
+
+
+/**
+ * Add a click handler to hide the popup.
+ * @return {boolean} Don't follow the href.
+ */
+closer.onclick = function() {
+  overlay.setPosition(undefined);
+  closer.blur();
+  return false;
+};
+
+
+/**
+ * Create an overlay to anchor the popup to the map.
+ */
+var overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
+  element: container,
+  autoPan: true,
+  autoPanAnimation: {
+    duration: 250
+  }
+}));
+
+
+
 var map = new ol.Map({
   layers: [
     new ol.layer.Tile({
@@ -221,6 +254,7 @@ var map = new ol.Map({
     clusters,
     //  vectorlayer
   ],
+  overlays: [overlay],
   target: 'map',
   
   interactions: ol.interaction.defaults().extend([
@@ -251,18 +285,42 @@ var map = new ol.Map({
 
 
 var displayFeatureInfo = function(pixel) {
-    console.log("test");
 
   var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+    console.log(feature);
     return feature;
   });
 
-  console.log(feature);
+  
 
 };
 
+
+function isCluster(feature) {
+  if (!feature || !feature.get('features')) { return false; }
+  return feature.get('features').length > 1;
+}
+
 map.on('click', function(evt) {
-  displayFeatureInfo(evt.pixel);
+  var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) { return feature; });
+  var features = feature.get('features');
+  if (isCluster(feature)) {    
+    // is a cluster, so loop through all the underlying features
+    for(var i = 0; i < features.length; i++) {
+      console.log(features[i].get('name'));
+    }
+  } else {
+    // not a cluster
+    //var features = features[0].get('features');
+    
+    var featurename = features[0].get('name');
+    content.innerHTML = '<p>' + featurename + '</p>';
+    
+    var geometry = feature.getGeometry();
+    var coord = geometry.getCoordinates();
+    //console.log(coord[0]);
+    overlay.setPosition(coord);
+  }
 });
 
 
@@ -320,8 +378,23 @@ map.on('moveend', onMoveEnd);
 function CenterMap(lon, lat) {
     console.log("Lon: " + lon + " Lat: " + lat);
     map.getView().setCenter(ol.proj.transform([lon, lat], 'EPSG:4326', 'EPSG:3857'));
-    map.getView().setZoom(5);
+    map.getView().setZoom(16);
 }
 
 
 
+
+/**
+ * Add a click handler to the map to render the popup.
+ */
+ /*
+map.on('singleclick', function(evt) {
+  var coordinate = evt.coordinate;
+  var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+      coordinate, 'EPSG:3857', 'EPSG:4326'));
+
+  content.innerHTML = '<p>You clicked here:</p><code>' + hdms + '</code>';
+  console.log(hdms);
+  overlay.setPosition(coordinate);
+});
+*/

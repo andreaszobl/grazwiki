@@ -4,6 +4,7 @@ function output(message) {
   output.innerHTML = message + "\n";
 }
 
+var location_changed = 0;
 
 window.onload = function() {
 
@@ -31,7 +32,7 @@ window.onload = function() {
                     new QWebChannel(socket, function(channel) {
                         // make dialog object accessible globally
                         window.dialog = channel.objects.dialog;
-
+                        
                         document.getElementById("send").onclick = function() {
                             var input = document.getElementById("input");
                             var text = input.value;
@@ -46,8 +47,31 @@ window.onload = function() {
 
                         dialog.sendText.connect(function(message) {
                             output("Received message: " + message);
-                            CenterMap(47.3, 13.3);
                         });
+                        
+                        dialog.locationChanged.connect(function(lon, lat) {
+                            output("locationChanged caught");
+                            var unixtime = new Date().getTime();
+                            unixtime /= 1000; 
+                            if (!(unixtime % 10)) {
+                              
+                            }
+                            if (location_changed == 0) {
+                              CenterMap(lat, lon);
+                            }
+                            
+                            location_changed = 1;
+                                                      
+                        });
+                        
+                        dialog.longitudeChanged.connect(function(message) {
+                            //output("longitudeChanged caught");                            
+                        });
+                        
+                        dialog.latitudeChanged.connect(function(message) {
+                            //output("latitudeChanged caught");                            
+                        });
+                        
 
                         dialog.receiveText("Client connected, ready to send/receive messages!");
                         output("Connected to WebChannel, ready to send/receive messages!");
@@ -59,3 +83,8 @@ window.onload = function() {
                 output(e);
               }
 }
+
+
+setInterval(function(){
+  //CenterMap(window.dialog.longitude, window.dialog.latitude); 
+}, 3000);

@@ -5,7 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     
-    <link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    
+    <link rel="stylesheet" href="./css/ol.css" type="text/css">
     <script src="./js/ol.js" type="text/javascript"></script>
     <script src="https://code.jquery.com/jquery-2.1.3.min.js" type="text/javascript"></script>
     
@@ -39,7 +41,15 @@
     </style>
   </head>
   <body>
-    <div id="map" class="map"></div>
+  
+  
+    <div id="map" class="map">
+      <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-content"></div>
+      </div>
+    </div>
+
     
 <div id="socketer">    
     <!-- Status: <span id="status"></span><br />
